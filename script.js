@@ -2,7 +2,9 @@ const inputField = document.querySelector('.inputField');
 const country1 = document.querySelector('.country1');
 const country2 = document.querySelector('.country2');
 const calcButton = document.querySelector('.calc');
-const resultContainer = document.querySelector(('.result'));
+const resultContainer = document.querySelector('.result');
+const date =  document.querySelector('.today');
+const resultDate = document.querySelector('.otherDate');
 const formulier = document.querySelector('#formulier');
 
 function handleRequest(response){
@@ -30,7 +32,7 @@ function exchangeRate(event){
 
 function calculate(omrekenWaarde){
   const number = parseFloat(inputField.value) * omrekenWaarde ;
-  const roundedNumber = number.toLocaleString(nl-BE,{
+  const roundedNumber = number.toLocaleString('nl-BE',{
     style:"currency",
     currency: country2.value,
     currencyDisplay: "symbol"
@@ -38,4 +40,29 @@ function calculate(omrekenWaarde){
   resultContainer.textContent = roundedNumber;
 }
 
+function otherDate(){
+  const request = new XMLHttpRequest();
+  request.addEventListener('readystatechange', function(event){
+    const response = event.target;
+    if(response.readyState === 4 && response.status === 200){
+      const responseTxt = JSON.parse(response.responseText);
+      const omrekenWaarde2 = Object.values(responseTxt.rates)[0];
+      calculateOther(omrekenWaarde2);
+    }
+  });
+  request.open('GET', 'https://api.exchangeratesapi.io/' + date.value + '?base=' + country1.value + '&symbols=' + country2.value);
+  request.send();
+}
+
+function calculateOther(omrekenWaarde2){
+  const number = parseFloat(inputField.value) * omrekenWaarde2 ;
+  const roundedNumber = number.toLocaleString('nl-BE',{
+    style:"currency",
+    currency: country2.value,
+    currencyDisplay: "symbol"
+  });
+  resultDate.textContent = roundedNumber;
+}
+
 calcButton.addEventListener('click', exchangeRate);
+calcButton.addEventListener('click', otherDate);
